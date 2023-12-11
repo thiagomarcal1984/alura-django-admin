@@ -422,3 +422,58 @@ admin.site.register(Fotografia, ListandoFotografias)
 
 - A propriedade `list_filter` de um `ModelAdmin` serve para criar um filtro baseado numa lista de valores de alguma(s) coluna(s) do modelo.
 - A propriedade `list_per_page` de um `ModelAdmin` serve para indicar o número de objetos que são exibidos por página no painel administrativo.
+
+# Funcionalidade de publicação
+O objetivo da aula é limitar a exibição das fotos apenas àquelas que estiverem configuradas como publicadas.
+
+Inserção do campo `publicado` na model `Fotografia` (mudança no arquivo `galeria/models.py`):
+
+```python
+from django.db import models
+
+class Fotografia(models.Model):
+    # Resto do código
+    publicado = models.BooleanField(default=False)
+    # Resto do código
+```
+
+Criação e aplicação da migration resultante da mudança do modelo (`python manage.py makemigrations` e `python manage.py migrate`):
+```
+(.venv) PS D:\alura\django-admin> python manage.py makemigrations
+Migrations for 'galeria':
+  galeria\migrations\0003_fotografia_publicado.py
+    - Add field publicado to fotografia
+(.venv) PS D:\alura\django-admin> python manage.py migrate       
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, galeria, sessions
+Running migrations:
+  Applying galeria.0003_fotografia_publicado... OK
+(.venv) PS D:\alura\django-admin> 
+```
+
+Mudança na view `index` para exibir apenas os objetos publicados (alterações no arquivo `galeria/views.py`):
+```python
+from django.shortcuts import render, get_object_or_404
+
+from galeria.models import Fotografia
+
+def index(request):
+    fotografias = Fotografia.objects.filter(publicado=True)
+    return render(request, 'galeria/index.html', {'cards' : fotografias})
+# Resto do código.
+```
+> Repare que o método usado para buscar os objetos do modelo `Fotografia` mudou de `Fotografia.objects.all()` para `Fotografia.objects.filter(publicado=True)`. Outros parâmetros correspondentes aos nomes dos campos e os valores procurados neles podem ser acrescentados no método `filter`.
+
+Mudanças no painel administrativo da classe `Fotografia` (alterações no arquivo `galeria/admin.py`):
+```python
+from django.contrib import admin
+
+from galeria.models import Fotografia
+
+class ListandoFotografias(admin.ModelAdmin):
+    list_display = ('id', 'nome', 'legenda', 'publicado')
+    # Resto do código
+    list_editable = ('publicado',)
+```
+> 1. Foi acrescentado o campo `publicado` à tupla de campos que serão exibidos no painel administrativo;
+> 2. O parâmetro `list_editable` contém uma lista ou tupla com todos os campos que podem ser massivamente editados no painel administrativo: no exemplo, podemos publicar ou despublicar várias fotografias de uma só vez.
