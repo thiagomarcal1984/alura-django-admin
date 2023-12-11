@@ -358,3 +358,46 @@ A classe-filha de `ModelAdmin` pode ter vários parâmetros para personalizar o 
 - `list_display_links` define quais colunas dentro de `list_display` vão conter links para modificação do objeto.
 - `search_fields` define quais colunas podem ser pesquisadas por meio de filtros.
 > Todos os campos mencionados recebem uma tupla ou uma lista com as colunas da classe de modelo.
+
+# Incluindo categoria
+Inclusão do capmo `categoria` na classe `Fotografia` (mudança no arquivo `galeria/models.py`):
+```python
+from django.db import models
+
+class Fotografia(models.Model):
+    OPCOES_CATEGORIA = [
+        ('NEBULOSA', 'Nebulosa'),
+        ('ESTRELA', 'Estrela'),
+        ('GALAXIA', 'Galáxia'),
+        ('PLANETA', 'Planeta'),
+    ]
+
+    # Resto do código
+    categoria = models.CharField(max_length=100, choices=OPCOES_CATEGORIA, default='')
+```
+> Repare que criamos uma lista de tuplas com dois objetos cada (chave e valor), que foi batizada de `OPCOES_CATEGORIA`.
+> 
+> Essa lista vai servir de valor para o parâmetro `choices` do campo CharField recém criado (`categoria`).
+> 
+> Definimos um valor em branco como padrão no parâmetro `default`.
+
+Criação da migration após a mudança da classe `Fotografia` (`python manage.py makemigrations`): 
+```
+(.venv) PS D:\alura\django-admin> python manage.py makemigrations
+Migrations for 'galeria':
+  galeria\migrations\0002_fotografia_categoria.py
+    - Add field categoria to fotografia
+(.venv) PS D:\alura\django-admin> 
+```
+
+Execução da migration criada (`python manage.py migrate`):
+```
+(.venv) PS D:\alura\django-admin> python manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, galeria, sessions
+Running migrations:
+  Applying galeria.0002_fotografia_categoria... OK
+(.venv) PS D:\alura\django-admin> 
+```
+
+Após a execução de todas essas operações, o campo `categoria` será criado com o formato de combo box no painel administrativo.
