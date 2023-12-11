@@ -303,3 +303,22 @@ Atualizando o template `templates/galeria/imagem.html`:
 > A função `{% static %}` permaneceu praticamente a mesma: o que mudou foi a inserção da interpolação do caminho da foto (`{{ fotografia.foto }}`). Os comandos `{% static %}` e a interpolação `{{ fotografia.foto }}` ficaram justapostos, um do lado do outro.
 >
 > De resto, temos apenas outras duas interpolações: `{{ fotografia.nome }}` e `{{ fotografia.legenda }}`.
+
+# Django Admin
+Criação de um superuser para acesso ao painel administrativo do Django com o comando `python manage.py createsuperuser`: 
+```
+(.venv) PS D:\alura\django-admin> python manage.py createsuperuser
+Usuário (leave blank to use 'thiago'): 
+Endereço de email: tma@cdtn.br
+Password: 
+Password (again):
+A senha é muito parecida com usuário
+Esta senha é muito curta. Ela precisa conter pelo menos 8 caracteres.        
+Esta senha é muito comum.
+Bypass password validation and create user anyway? [y/N]: y
+Superuser created successfully.
+(.venv) PS D:\alura\django-admin> 
+```
+> Esse superuser é armazenado no banco de dados, como qualquer outro objeto de modelo do Django.
+
+Para acessar o painel administrativo, visite a rota `admin` (geralmente no caminho http://localhost:8000/admin/). O nome de usuário e a senha cadastrados serão solicitados.
