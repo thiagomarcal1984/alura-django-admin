@@ -477,3 +477,45 @@ class ListandoFotografias(admin.ModelAdmin):
 ```
 > 1. Foi acrescentado o campo `publicado` à tupla de campos que serão exibidos no painel administrativo;
 > 2. O parâmetro `list_editable` contém uma lista ou tupla com todos os campos que podem ser massivamente editados no painel administrativo: no exemplo, podemos publicar ou despublicar várias fotografias de uma só vez.
+
+# Incrementando o index
+Acréscimo do campo `data_fotografia` (mudanças no arquivo `galeria/models.py`):
+```python
+from django.db import models
+from datetime import datetime
+
+class Fotografia(models.Model):
+    # Resto do código
+    data_fotografia = models.DateTimeField(default=datetime.now, blank=False)
+    # Resto do código
+```
+
+Aplicação das migrations:
+```
+(.venv) PS D:\alura\django-admin> python manage.py makemigrations
+Migrations for 'galeria':
+  galeria\migrations\0004_fotografia_data_fotografia.py
+    - Add field data_fotografia to fotografia
+(.venv) PS D:\alura\django-admin> python manage.py migrate       
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, galeria, sessions
+Running migrations:
+  Applying galeria.0004_fotografia_data_fotografia...D:\alura\django-admin\.venv\Lib\site-packages\django\db\models\fields\__init__.py:1564: RuntimeWarning: DateTimeField Fotografia.data_fotografia received a naive datetime (2023-12-11 20:13:27.556632) while time zone support is active.
+  warnings.warn(
+ OK
+(.venv) PS D:\alura\django-admin> 
+```
+
+Mudanças na lógica de exibição das fotos: elas serão exibidas pela ordem decrescente de data de publicação. Alterações no arquivo `galeria/views.py`:
+```python
+from django.shortcuts import render, get_object_or_404
+
+from galeria.models import Fotografia
+
+def index(request):
+    fotografias = Fotografia.objects.order_by('-data_fotografia').filter(publicado=True)
+    return render(request, 'galeria/index.html', {'cards' : fotografias})
+```
+> Note que antes do método `filter` inserimos o método `order_by('string_de_campos)`. Na verdade poderíamos até colocar o método `order_by` depois de `filter`.
+>
+> Para exibir um determinado campo em ordem decrescente (que é o nosso caso, já que queremos mostrar as fotos mais recentes primeiro), prefixamos o nome do campo ordenado com um hífen (`'-data-fotografia'`).
