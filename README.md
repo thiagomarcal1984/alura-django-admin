@@ -230,3 +230,76 @@ Mudanças no arquiv `templates/galeria/index.html`:
 ```
 
 > Note que o objeto `cards` que veio da view agora é uma lista de objetos, não mais um dicionário. A instância foi renomeada para `fotografia`.
+
+# Passando uma referência
+Inserindo uma nova fotografia usando o shell do Django: 
+```
+(.venv) PS D:\alura\django-admin> python manage.py shell    
+Python 3.11.7 (tags/v3.11.7:fa7a6f2, Dec  4 2023, 19:24:49) [MSC v.1937 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.       
+(InteractiveConsole)
+>>> from galeria.models import Fotografia
+>>> foto = Fotografia(nome="Galáxia NGC 1079", legenda="nasa.org / NASA / Hubble", foto="hubble_ngc1079.jpg")
+>>> foto.save()
+>>> 
+```
+> A fotografia `hubble_ngc1079.jpg` foi inserida no diretório `setup/static/assets/imagens/galeria`. Essa é uma etapa à parte da inserção do objeto no banco de dados, usando o shell.
+
+Alterando a view de imagem, para que ela mostre dinamicamente a foto em função da id dessa foto, para buscá-la no banco de dados (`galeria/views.py`):
+```python
+from django.shortcuts import render, get_object_or_404
+
+from galeria.models import Fotografia
+
+# Resto do código
+
+def imagem(request, foto_id):
+    fotografia = get_object_or_404(Fotografia, pk=foto_id)
+    return render(request, 'galeria/imagem.html', { 'fotografia' : fotografia })
+```
+> 1. Repare que a função recebeu mais um parâmetro (`foto_id`). Quando a view `imagem` for invocada, é necessário fornecer também esse parâmetro.
+> 2. A função `get_object_or_404`, do pacote `django.shortcuts`, procura o objeto do modelo e retorna um erro 404 se não encontrar esse objeto. Para usar a função fornecemos dois parâmetros: o modelo (`Fotografia`) e a id/primary key procurada (`pk=foto_id` ou `id=foto_id`).
+
+Modificando o arquivo `galeria/urls.py` para obrigar o fornecimento do parâmetro `foto_id`:
+```python
+from django.urls import path
+from galeria.views import index, imagem
+
+urlpatterns = [
+    path('', index, name='index'),
+    path('imagem/<int:foto_id>', imagem, name='imagem'),
+]
+```
+> Note na sintaxe dentro da string do path da imagem: `<int:foto_id>`. A primeira parte é o tipo de dados; e a segunda parte é o nome do parâmetro que será enviado para a view `imagem`.
+
+Atualizando o template `templates/galeria/index.html`:
+```html
+<!-- Resto do código -->
+{% for fotografia in cards %}
+<li class="card">
+    <a href="{% url 'imagem' fotografia.id %}">
+        <!-- Resto do código -->
+    </a>
+</li>
+{% endfor %}
+```
+> Repare na sintaxe do comando `{% url %}`: antes ele só recebia um único parâmetro: o nome da view; agora ele também recebe a identificação da fotografia (`fotografia.id`).
+
+Atualizando o template `templates/galeria/imagem.html`:
+```html
+<!-- Resto do código -->
+<div class="imagem__conteudo">
+    <img class="imagem__imagem" src="{% static '/assets/imagens/galeria/' %}{{ fotografia.foto }}">
+    <div class="imagem__info">
+        <div class="imagem__texto">
+            <p class="imagem__titulo">{{ fotografia.nome }}</p>
+            <p class="imagem__descricao">{{ fotografia.legenda }}</p>
+            <p class="imagem__texto"></p>
+        </div>
+    </div>
+</div>
+<!-- Resto do código -->
+```
+> A função `{% static %}` permaneceu praticamente a mesma: o que mudou foi a inserção da interpolação do caminho da foto (`{{ fotografia.foto }}`). Os comandos `{% static %}` e a interpolação `{{ fotografia.foto }}` ficaram justapostos, um do lado do outro.
+>
+> De resto, temos apenas outras duas interpolações: `{{ fotografia.nome }}` e `{{ fotografia.legenda }}`.
