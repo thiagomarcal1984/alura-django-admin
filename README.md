@@ -401,3 +401,24 @@ Running migrations:
 ```
 
 Após a execução de todas essas operações, o campo `categoria` será criado com o formato de combo box no painel administrativo.
+
+# Personalizando o admin
+Mudanças no arquivo `galeria/admin.py`:
+```python
+from django.contrib import admin
+
+from galeria.models import Fotografia
+
+class ListandoFotografias(admin.ModelAdmin):
+    list_display = ('id', 'nome', 'legenda')
+    list_display_links = ('id', 'nome')
+    search_fields = ('nome',)
+    # Novos parâmetros:
+    list_filter = ('categoria',)
+    list_per_page = 10
+
+admin.site.register(Fotografia, ListandoFotografias)
+```
+
+- A propriedade `list_filter` de um `ModelAdmin` serve para criar um filtro baseado numa lista de valores de alguma(s) coluna(s) do modelo.
+- A propriedade `list_per_page` de um `ModelAdmin` serve para indicar o número de objetos que são exibidos por página no painel administrativo.
