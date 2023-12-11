@@ -192,3 +192,41 @@ INSTALLED_APPS = [
 > - Configurações de banco de dados: O atributo `default_auto_field` permite definir o tipo de campo automático a ser usado para as chaves primárias do modelo. Isso é útil quando você precisa personalizar o tipo de campo usado pelo Django para criar as tabelas no banco de dados. 
 > 
 > Essas são apenas algumas das configurações que podem ser definidas na classe AppConfig. Para saber mais sobre as configurações disponíveis, você pode consultar a documentação oficial do Django sobre a classe AppConfig.
+
+# Acessando o banco
+Mudanças no arquivo  `galeria/views.py`:
+```python
+from django.shortcuts import render
+
+from galeria.models import Fotografia
+
+def index(request):
+    fotografias = Fotografia.objects.all()
+    return render(request, 'galeria/index.html', {'cards' : fotografias})
+# Resto do código
+```
+> Repare que a consulta ao banco de dados é simplificada: basta usar o comando `NomeDoModelo.objects.all()`.
+
+Mudanças no arquiv `templates/galeria/index.html`:
+```html
+<!-- Resto do código -->
+{% if cards %}
+    {% for fotografia in cards %}
+    <li class="card">
+        <!-- Resto do código -->
+        <div class="card__info">
+            <p class="card__titulo">{{ fotografia.nome }}</p>
+            <div class="card__texto">
+                <p class="card__descricao">{{ fotografia.legenda }}</p>
+                <!-- Resto do código -->
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+{% else %}
+    {# Nada a exibir caso não haja os cards. #}
+{% endif %}
+<!-- Resto do código -->
+```
+
+> Note que o objeto `cards` que veio da view agora é uma lista de objetos, não mais um dicionário. A instância foi renomeada para `fotografia`.
