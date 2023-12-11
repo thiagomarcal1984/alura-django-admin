@@ -322,3 +322,39 @@ Superuser created successfully.
 > Esse superuser é armazenado no banco de dados, como qualquer outro objeto de modelo do Django.
 
 Para acessar o painel administrativo, visite a rota `admin` (geralmente no caminho http://localhost:8000/admin/). O nome de usuário e a senha cadastrados serão solicitados.
+
+# CRUD no Admin
+No momento, os objetos de modelo do aplicativo `galeria` não estão visíveis no painel administrativo do Django.
+
+Para exibi-los no painel administrativo, é necessário modificar o arquivo `admin.py` do aplicativo (neste caso, ele está armazenado em `galeria/admin.py`):
+```python
+from django.contrib import admin
+
+from galeria.models import Fotografia
+
+admin.site.register(Fotografia)
+```
+Inserir os objetos no painel administrativo é simples: basta usar o comando `admin.site.register(ClasseDeModelo)`. No exemplo, importamos a classe `Fotografia` do módulo `galeria.models`
+
+Usando essa sintaxe de registro de classe exibe para o painel `Fotografias` apenas a representação em string do objeto armazenado em banco.
+
+Podemos personalizar o painel administrativo do Django usando a superclasse `admin.ModelAdmin`. Mudanças no arquivo `galeria/admin.py`:
+```python
+from django.contrib import admin
+
+from galeria.models import Fotografia
+
+class ListandoFotografias(admin.ModelAdmin):
+    list_display = ('id', 'nome', 'legenda')
+    list_display_links = ('id', 'nome')
+    search_fields = ('nome',)
+
+admin.site.register(Fotografia, ListandoFotografias)
+```
+> Perceba que o comando `admin.site.register` agora recebe dois parâmetros: o modelo (`Fotografia`) e a classe filha personalizada de `admin.ModelAdmin` (no caso, a classe `ListandoFotografias`).
+
+A classe-filha de `ModelAdmin` pode ter vários parâmetros para personalizar o painel administrativo do objeto. Por exemplo:
+- `list_display` define as colunas que serão exibidas no painel.
+- `list_display_links` define quais colunas dentro de `list_display` vão conter links para modificação do objeto.
+- `search_fields` define quais colunas podem ser pesquisadas por meio de filtros.
+> Todos os campos mencionados recebem uma tupla ou uma lista com as colunas da classe de modelo.
