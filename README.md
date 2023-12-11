@@ -125,3 +125,70 @@ Running migrations:
 Para visualizarmos como ficou o banco SQLite, usamos a extensão SQLite Viewer (publicada pelo Florian Klampfer) do VS Code. Para visualizar o conteúdo banco, clique com o botão direito sobre o banco de dados e escolha a opção `"Abrir Com (Open With...)"` e em seguida escolher o editor SQLite Viewer.
 
 Com essa extensão, podemos confirmar que as tabelas de cada aplicativo do projeto foram geradas no SQLite.
+
+# Criando dados
+Vamos inserir um objeto de modelo usando o shell do Django (comando `python manage.py shell`):
+
+```
+(.venv) PS D:\alura\django-admin> python manage.py shell
+Python 3.11.7 (tags/v3.11.7:fa7a6f2, Dec  4 2023, 19:24:49) [MSC v.1937 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.       
+(InteractiveConsole)
+>>> from galeria.models import Fotografia
+>>> foto = Fotografia(nome="Nebulosa de Carina", legenda="webbtelescope.org / NASA / James Webb", foto="carina-nebula.png")
+>>> foto.save()
+>>> Fotografia.objects.all()
+<QuerySet [<Fotografia: Fotografia [nome = Nebulosa de Carina]>]>
+>>>
+```
+> Passo a passo para salvar um objeto no banco após a abertura do shell do Django: 
+> 1. Importamos a classe `Fotografia`:
+> ```from galeria.models import Fotografia```
+> 2. Criamos uma instância de Fotografia e a armazenamos em uma variável:
+> ```foto = Fotografia(nome="Nebulosa de Carina", legenda="webbtelescope.org / NASA / James Webb", foto="carina-nebula.png")```
+> 3. Salvamos a instância no banco com o método `save()`:
+> ```foto.save()```
+> 4. Para confirmarmos a inserção do objeto, consultamos a lista de objetos da classe com o comando `Classe.objects.all()`:
+> ```Fotografia.objects.all()```
+
+## Offtopic: como importar um aplicativo em `settings.py`
+Costuma ser ensinado que basta inserir o nome do aplicativo na lista de apps instalados (`INSTALLED_APPS`) nas configurações do Django (`settings.py`):
+```python
+INSTALLED_APPS = [
+    # Demais aplicativos...
+    'galeria',
+]
+```
+
+Uma boa prática é importar o arquivo que extende da classe `AppConfig`, que costuma ficar localizado no módulo `apps` do aplicativo. Por exemplo, o arquivo `galeria/apps.py` contém a classe `GaleriaConfig` (que extende de `AppConfig`):
+```python
+from django.apps import AppConfig
+
+class GaleriaConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'galeria'
+```
+
+Nesse caso, o arquivo `settings.py` ficaria assim:
+```python
+INSTALLED_APPS = [
+    # Demais aplicativos...
+    'galeria.apps.GaleriaConfig',
+]
+```
+> **Pergunta feita para a Luri:**
+> Por que é melhor importarmos uma classe AppConfig ao invés de apenas referenciarmos o nome do aplicativo na lista INSTALLED_APPS do arquivo `settings.py`?
+> 
+> **Resposta da Luri:**
+> Importar uma classe AppConfig ao invés de apenas referenciar o nome do aplicativo na lista INSTALLED_APPS do arquivo `settings.py` é uma boa prática porque a classe AppConfig permite que você personalize e configure o comportamento do aplicativo de forma mais flexível. Ela fornece métodos e atributos que podem ser usados para definir configurações adicionais, como o nome amigável do aplicativo, configurações de banco de dados, configurações de URL, entre outras. Dessa forma, você tem mais controle sobre o comportamento do aplicativo e pode organizar melhor as configurações.
+> 
+> **Pergunta feita para a Luri:**
+> Onde consigo perceber essas configurações estendidas de AppConfig? Nome amigável, configuração de URL, de banco de dados etc.
+> 
+> **Resposta da Luri:**
+> As configurações estendidas de AppConfig podem ser percebidas nos métodos e atributos disponíveis na classe. Alguns exemplos de configurações que podem ser definidas são:
+> - Nome amigável do aplicativo: O método `verbose_name` permite definir um nome amigável para o aplicativo, que será exibido em algumas partes da interface do Django. 
+> - Configurações de URL: O atributo `urlconf` permite definir o módulo de URLs específico para o aplicativo, permitindo que você organize as URLs de forma mais modular. 
+> - Configurações de banco de dados: O atributo `default_auto_field` permite definir o tipo de campo automático a ser usado para as chaves primárias do modelo. Isso é útil quando você precisa personalizar o tipo de campo usado pelo Django para criar as tabelas no banco de dados. 
+> 
+> Essas são apenas algumas das configurações que podem ser definidas na classe AppConfig. Para saber mais sobre as configurações disponíveis, você pode consultar a documentação oficial do Django sobre a classe AppConfig.
