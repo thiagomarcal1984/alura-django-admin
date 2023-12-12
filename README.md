@@ -573,3 +573,28 @@ Running migrations:
 (.venv) PS D:\alura\django-admin> 
 ```
 > Eventualmente o Django pode reclamar de você não ter instalado o pacote `Pillow`. Instale-o com pip, se for o caso: `pip install Pillow`. O arquivo `requirements.txt` foi atualizado.
+
+# Imagem "not found"
+> Erro grosseiro: o parâmetro no método `static` é `document_root`, não `media_root`. Configuração correta do arquivo `setup/urls.py`:
+> ```python
+> from django.conf import settings
+> from django.conf.urls.static import static
+> 
+> urlpatterns = [
+>     # Resto do código
+> ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+> ```
+
+Mudanças no template `templates/galeria/index.html`:
+```html
+<!-- Resto do código -->
+<a href="{% url 'imagem' fotografia.id %}">
+    {% if fotografia.foto == '' or fotografia.foto == null%}
+        <img class="card__imagem" src="{% static '/assets/imagens/galeria/not-found.png' %}">
+    {% else %}
+        <img class="card__imagem" src="{{ fotografia.foto.url }}">
+    {% endif %}
+</a>
+<!-- Resto do código -->
+```
+> Note que no bloco `{% else %}` temos o caminho para a URL da foto, e não o objeto foto em si. O Django consegue interpretar que a imagem está dentro do diretório `MEDIA_ROOT` (desde que ele seja corretamente mencionado em `setup/urls.py`).
