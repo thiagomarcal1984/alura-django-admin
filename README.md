@@ -519,3 +519,57 @@ def index(request):
 > Note que antes do método `filter` inserimos o método `order_by('string_de_campos)`. Na verdade poderíamos até colocar o método `order_by` depois de `filter`.
 >
 > Para exibir um determinado campo em ordem decrescente (que é o nosso caso, já que queremos mostrar as fotos mais recentes primeiro), prefixamos o nome do campo ordenado com um hífen (`'-data-fotografia'`).
+
+# Novo caminho para fotos
+Definição do diretório que conterá as mídias/arquivos de upload (alterações no arquivo `settings.py`):
+
+```python
+# Resto do código
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+# Resto do código
+```
+
+Configuração das rotas de acesso à URL de mídia (alterações no arquivo `setup/urls.py`):
+```python
+from django.contrib import admin
+from django.urls import path, include
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('galeria.urls')),
+] + static(settings.MEDIA_URL, media_root=settings.MEDIA_ROOT)
+```
+
+Mudança no modelo para definirmos um campo de imagem (alterações no arquivo `galeria/models.py`):
+```python
+from django.db import models
+from datetime import datetime
+
+class Fotografia(models.Model):
+    # Resto do código
+    foto = models.ImageField(upload_to='fotos/%Y/%m/%d/', blank=True, max_length=100)
+    # Resto do código
+```
+> 1. Repare que o diretório de destino do upload (parâmetro `upload_to`) possui uma estrutura de vários subdiretórios: `foto/ano/mês/dia/`.
+> 2. Pra constar: não confunda o diretório root `static` com o diretório root `media`. O mesmo vale para suas URLs.
+> 3. O arquivo `n159.jpg` foi salvo manualmente por mim na pasta `static` apenas para fins de documentação. Ao inserir essa imagem, na verdade ela foi salva no caminho `media/fotos/%Y/%m/%d/n159.jpg`. O diretório `media` é ignorado pelo `.gitignore`.
+> 4. Os outros arquivos de imagem, até então, estão salvos no diretório `static`. O novo arquivo inserido não é exibido em index porque a URL usada é a `static`, e a nova imagem foi salva no diretório mencionado em `MEDIA_ROOT`.
+
+Execução das migrações:
+```
+(.venv) PS D:\alura\django-admin> python manage.py makemigrations
+Migrations for 'galeria':
+  galeria\migrations\0005_alter_fotografia_foto.py
+    - Alter field foto on fotografia
+(.venv) PS D:\alura\django-admin> python manage.py migrate       
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, galeria, sessions
+Running migrations:
+  Applying galeria.0005_alter_fotografia_foto... OK
+(.venv) PS D:\alura\django-admin> 
+```
+> Eventualmente o Django pode reclamar de você não ter instalado o pacote `Pillow`. Instale-o com pip, se for o caso: `pip install Pillow`. O arquivo `requirements.txt` foi atualizado.
