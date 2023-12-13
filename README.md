@@ -598,3 +598,24 @@ Mudanças no template `templates/galeria/index.html`:
 <!-- Resto do código -->
 ```
 > Note que no bloco `{% else %}` temos o caminho para a URL da foto, e não o objeto foto em si. O Django consegue interpretar que a imagem está dentro do diretório `MEDIA_ROOT` (desde que ele seja corretamente mencionado em `setup/urls.py`).
+
+# Alterando template imagem
+A alteração no arquivo `templates/galeria/imagem.html` é bem simples. Ela vai consistir apenas em mudar a referência do campo `foto` para `foto.url`:
+```html
+{% if fotografia.foto == '' or fotografia.foto == null%}
+    <img class="card__imagem" src="{% static '/assets/imagens/galeria/not-found.png' %}">
+{% else %}
+    <img class="card__imagem" src="{{ fotografia.foto.url }}">
+{% endif %}
+```
+Uma pequena mudança no arquivo `galeria/models.py`, sem relevância:
+```python
+from django.db import models
+from datetime import datetime
+
+class Fotografia(models.Model):
+    # Resto do código
+    def __str__(self):
+        # return f"Fotografia [nome = {self.nome}]"
+        return self.nome
+```
