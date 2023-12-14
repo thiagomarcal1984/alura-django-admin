@@ -656,3 +656,39 @@ Atualização do template `templates/galeria/partials/_menu.html`:
 <!-- Resto do código -->
 ```
 > A mudança no arquivo HTML consiste em envolver o campo de busca por uma tag de formulário com uma action para a nova view criada (`{% url 'buscar' %}`) e a criação de um botão para enviar o formulário (até o momento era apenas uma imagem).
+
+# View de buscar
+Os arquivos `templates/galeria/index.html` e `templates/galeria/buscar.html` serão iguais:
+```html
+<!-- Resto do código -->
+<ul class="cards__lista">
+    {% if cards %}
+        {% for fotografia in cards %}
+        <!-- Lógica de exibição das fotos se existirem. -->
+        {% endfor %}
+    {% else %}
+        <div class="imagem__texto">
+            <p>Fotografias não encontradas.</p>
+        </div>
+    {% endif %}
+</ul>
+```
+Foco na variável `cards`: ela vai vir da view `buscar` (mudanças no arquivo `galeria/views.py`):
+```python
+from django.shortcuts import render, get_object_or_404
+
+from galeria.models import Fotografia
+
+# Resto do código
+def buscar(request):
+    fotografias = Fotografia.objects.order_by('-data_fotografia').filter(publicado=True)
+    if "buscar" in request.GET:
+        nome_a_buscar = request.GET['buscar']
+        if nome_a_buscar:
+            fotografias = fotografias.filter(nome__icontains=nome_a_buscar)
+    return render(request, 'galeria/index.html', {'cards' : fotografias})
+```
+> 1. Os filtros do ORM Django podem ser aninhados. Repare na linha `fotografias = fotografias.filter(nome__icontains=nome_a_buscar)`;
+> 2. Repare também no parâmetro `nome__icontains` do método `filter`: esse filtro do Django testa se o campo `nome` contém o valor fornecido. A letra `i` é de insensitive, ou seja, vai ignorar letras maiúsculas ou minúsculas;
+> 3. No Django, a lista de parâmetros é obtida a partir do dicionário `request.GET`. 
+> 4. Para testar a existência de algum campo nesse dicionário, use o comando `if "nome_campo" in request.GET: # Resto do código`.
