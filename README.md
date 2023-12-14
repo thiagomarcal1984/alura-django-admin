@@ -692,3 +692,6 @@ def buscar(request):
 > 2. Repare também no parâmetro `nome__icontains` do método `filter`: esse filtro do Django testa se o campo `nome` contém o valor fornecido. A letra `i` é de insensitive, ou seja, vai ignorar letras maiúsculas ou minúsculas;
 > 3. No Django, a lista de parâmetros é obtida a partir do dicionário `request.GET`. 
 > 4. Para testar a existência de algum campo nesse dicionário, use o comando `if "nome_campo" in request.GET: # Resto do código`.
+
+# Autenticação e autorização
+Esta aula tratou apenas do painel administrativo do Django: criação de usuários, criação de grupos e atribuição de permissão para grupos e usuários.
