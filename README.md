@@ -619,3 +619,40 @@ class Fotografia(models.Model):
         # return f"Fotografia [nome = {self.nome}]"
         return self.nome
 ```
+# Funcionalidade buscar
+Inserção da view `buscar` (mudanças no arquivo `galeria/views.py`):
+```python
+from django.shortcuts import render, get_object_or_404
+
+# Resto do código
+def buscar(request):
+    return render(request, 'galeria/buscar.html')
+```
+> O template `galeria/buscar.html` foi criado de forma muito simples no momento. Não compensa colocar o código dele agora.
+
+Atualização das rotas para conter a view `buscar` (mudanças no arquivo `galeria/urls.py`):
+```python
+from django.urls import path
+from galeria.views import index, imagem, buscar
+
+urlpatterns = [
+    path('', index, name='index'),
+    path('imagem/<int:foto_id>', imagem, name='imagem'),
+    path('buscar', buscar, name='buscar'),
+]
+```
+
+Atualização do template `templates/galeria/partials/_menu.html`:
+```html
+<!-- Resto do código -->
+<div class="busca__fundo">
+    <form action="{% url 'buscar' %}">
+        <input class="busca__input" type="text" name="buscar" placeholder="O que você procura?">
+        <button type="submit">
+            <img class="busca__icone" src="{% static '/assets/ícones/1x/search.png' %}">
+        </button>
+    </form>
+</div>
+<!-- Resto do código -->
+```
+> A mudança no arquivo HTML consiste em envolver o campo de busca por uma tag de formulário com uma action para a nova view criada (`{% url 'buscar' %}`) e a criação de um botão para enviar o formulário (até o momento era apenas uma imagem).
